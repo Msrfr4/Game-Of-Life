@@ -1,0 +1,141 @@
+#include <iostream>
+#include <vector>
+#include <thread>
+using namespace std;
+vector<vector<int>> mai;
+vector<vector<int>> m;
+
+class Universe {
+    vector<vector<int>> mainv;
+public:
+    Universe() : mainv(22, vector<int>(52, 0)) {}
+    void initialize() {
+        int n;
+        cout << "Enter the number of values (how many cells do u want) :\n enter 4 to test: ";
+        cin >> n;
+        cout << "Enter the row and column of the cells you want alive:\n"
+                "8 8\n"
+                "8 9\n"
+                "8 10\n"
+                "9 9\n"
+                "copy these for testing: " << endl;
+        for (int i = 0; i < n; ++i) {
+            int row, col;
+            cin >> row >> col;
+            if (row >= 0 && row < 22 && col >= 0 && col < 52) {
+                mainv[row][col] = 1;
+            } else {
+                cout << "Invalid input:";
+                --i;
+            }
+        }
+        mai = mainv;
+        display(mainv);
+    }
+    vector<vector<int>> next_generation(vector<vector<int>> v) {
+        vector<vector<int>> v1 = v;
+        for (int i = 1; i <= 20; ++i) {
+            for (int j = 1; j <= 50; ++j) {
+                int neighbors = v[i - 1][j - 1] + v[i - 1][j] + v[i - 1][j + 1] +
+                                v[i][j - 1] + v[i][j + 1] +
+                                v[i + 1][j - 1] + v[i + 1][j] + v[i + 1][j + 1];
+                if (v[i][j] == 0 && neighbors == 3) {
+                    v1[i][j] = 1;
+                } else if (v[i][j] == 1 && (neighbors < 2 || neighbors > 3)) {
+                    v1[i][j] = 0;
+                }
+            }
+        }
+        mainv = v1;
+        return v1;
+    }
+    void display(vector<vector<int>> v) {
+        system("cls");
+        vector<vector<char>> sh(20, vector<char>(50, ' '));
+        for (int i = 1; i <= 20; ++i) {
+            for (int j = 1; j < 50; ++j) {
+                if (v[i][j] == 1) {
+                    sh[i][j] = '*';
+                }
+            }
+        }
+        m = v;
+        for (int i = 0; i < 20; ++i) {
+            for (int j = 0; j < 50; ++j) {
+                cout << sh[i][j] << ' ';
+            }
+            cout << endl;
+        }
+    }
+    void run() {
+        vector<vector<int>> r1 = mainv;
+        display(r1);
+        mai = r1;
+        r1 = next_generation(r1);
+    }
+    void count_neighbors() {
+        int count = 0;
+        for (int i = 1; i < 20; ++i) {
+            for (int j = 1; j < 50; ++j) {
+                count += m[i][j];
+            }
+        }
+        cout << "Alive cells: " << count << endl;
+    }
+    void reset() {
+        for (int i = 0; i < 20; ++i) {
+            for (int j = 0; j < 50; ++j) {
+                mainv[i][j] = 0;
+            }
+        }
+        mai = mainv;
+        m = mainv;
+    }
+};
+int main() {
+    Universe u;
+    int choice = 0;
+    cout << "=======================================" << endl;
+    cout << "            GAME OF LIFE               " << endl;
+    cout << "=======================================" << endl;
+    while (choice != 6) {
+        cout << "1. Initialize the Universe" << endl;
+        cout << "2. Reset the Universe" << endl;
+        cout << "3. Display the Current Universe" << endl;
+        cout << "4. Run the Simulation" << endl;
+        cout << "5. Count Neighbors" << endl;
+        cout << "6. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        if (choice == 1) {
+            u.initialize();
+        }
+        else if (choice == 2) {
+            u.reset();
+            cout << "Universe has been reset to all dead cells." << endl;
+        }
+        else if (choice == 3) {
+            u.display(mai);
+        }
+        else if (choice == 4) {
+            int run;
+            cout << "Enter the number of generations to run: ";
+            cin >> run;
+            while (run > 0) {
+                u.run();
+                run--;
+                this_thread::sleep_for(chrono::milliseconds(500));
+            }
+        }
+        else if (choice == 5) {
+            u.count_neighbors();
+        }
+        else if (choice == 6) {
+            cout << "Exiting the program. Goodbye!" << endl;
+        }
+        else {
+            cout << "Invalid choice. Please try again." << endl;
+        }
+    }
+    return 0;
+}
